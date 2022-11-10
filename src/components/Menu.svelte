@@ -12,7 +12,7 @@
 </script>
 
 <fieldset>
-  <legend>Choose your rate</legend>
+  <legend>Choose your ice cream</legend>
   <Radio
     id="cookies_n_cream"
     name="rate-option"

@@ -1,9 +1,12 @@
 import { fireEvent, render, screen } from '@testing-library/svelte';
 import html from 'svelte-htm';
+import userEvent from '@testing-library/user-event';
 import Menu from './Menu.svelte';
 import { cookiesAndCream, chocChipMint, raspberry } from "../lib/MenuItems";
 
 describe('Menu tests', () => {
+    const user = userEvent.setup();
+
     test('changing options invokes callback - FAILS if you click once', async () => {
         const mockChangeHandler = vi.fn();
         render(html`
@@ -19,11 +22,8 @@ describe('Menu tests', () => {
         const rInput = document.querySelector('#raspberry');
         expect(rInput).not.toBeChecked();
         mockChangeHandler.mockReset();
-        await fireEvent.click(rInput);
+        await user.click(rInput);
         expect(mockChangeHandler).toBeCalledWith(raspberry);
-        mockChangeHandler.mockReset();
-        await fireEvent.click(cncInput);
-        expect(mockChangeHandler).toBeCalledWith(cookiesAndCream);
     });
 
     test('changing options invokes callback - FAILS if you click once, UNLESS you choose the first item', async () => {
@@ -44,6 +44,7 @@ describe('Menu tests', () => {
         await fireEvent.click(cncInput);
         expect(mockChangeHandler).toBeCalledWith(cookiesAndCream);
 
+        // Once the first item works, then the rest work too...
         // Reset mock, and select the non-first item on the menu
         mockChangeHandler.mockReset();
         await fireEvent.click(rInput);
@@ -69,8 +70,8 @@ describe('Menu tests', () => {
         const rInput = document.querySelector('#raspberry');
         expect(rInput).not.toBeChecked();
         // NOTICE - I'm firing this action twice
-        await fireEvent.click(rInput);
-        await fireEvent.click(rInput);
+        await user.click(rInput);
+        await user.click(rInput);
         expect(mockChangeHandler).toBeCalledWith(raspberry);
         mockChangeHandler.mockReset();
     });
