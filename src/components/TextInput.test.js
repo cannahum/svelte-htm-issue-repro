@@ -11,34 +11,6 @@ const textInputProps = {
 };
 
 describe('components/FormFields/TextInput tests', () => {
-	test('renders the wrapper <div/>, the input and the default label ', () => {
-		render(TextInput, { props: { ...textInputProps } });
-		expect(document.querySelector('input')).toBeInTheDocument();
-		expect(document.querySelector('.input-wrapper')).toBeInTheDocument();
-		expect(screen.getByLabelText(textInputProps.description)).toBeInTheDocument();
-	});
-
-	test('sets disabled class and disables the input', () => {
-		render(TextInput, { props: { ...textInputProps, disabled: true } });
-		expect(document.querySelector('.input-wrapper')).toHaveClass('disabled');
-		expect(screen.getByPlaceholderText(textInputProps.placeholder)).toBeDisabled();
-	});
-
-	test('it renders slot label correctly', () => {
-		render(
-			html`<${TextInput} 
-        description=${textInputProps.description} 
-        errors={[]} 
-        id=${textInputProps.id}
-        >
-          <p slot="input-label">Phone number label</p>
-        </TextInput>`,
-		);
-		expect(screen.getByText('Phone number label')).toBeInTheDocument();
-		expect(screen.queryByLabelText(textInputProps.description)).toBeFalsy();
-		expect(document.querySelector(`#${textInputProps.id}`)).toBeInTheDocument();
-	});
-
 	test('it handles events', async () => {
 		const mockFunction = vi.fn();
 		render(
@@ -46,14 +18,18 @@ describe('components/FormFields/TextInput tests', () => {
 				description=${textInputProps.description}
 				errors="{[]}"
 				id=${textInputProps.id}
-				on:keydown=${mockFunction}
+				on:keydown=${(e) => mockFunction(e.key)}
+				on:change=${(e) => mockFunction(e.target.value)}
 			/>`,
 		);
 		expect(document.querySelector(`#${textInputProps.id}`)).toBeInTheDocument();
 		const input = document.querySelector('input');
 		if (!input) throw new Error('No input found');
 		await fireEvent.keyDown(input, { key: 'Enter', code: 'Enter', charCode: 13 });
-		expect(mockFunction).toHaveBeenCalled();
+		expect(mockFunction).toBeCalledWith('Enter');
+		mockFunction.mockReset();
+		await fireEvent.change(input, { target: { value: 'hello' } });
+		expect(mockFunction).toBeCalledWith('hello');
 	});
 
 	test('it communicates value through two-way binding', async () => {
